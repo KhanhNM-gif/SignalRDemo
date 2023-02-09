@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SignalR Basic Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@3.1.7/dist/browser/signalr.min.js"></script>
+</head>
+
+<body>
+    <h1>SignalR Basic Example</h1>
+    <input type="text" id="message" />
+    <input type="button" id="sendmessage" value="Send" />
+    <br />
+    <br />
+    <div id="discussion"></div>
+
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:7039/chat").build();
+
+        connection.on("ReceiveMessage", function (user, message) {
+            var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            var encodedMsg = user + " says " + msg;
+            var li = document.createElement("li");
+            li.textContent = encodedMsg;
+            document.getElementById("discussion").appendChild(li);
+        });
+
+        document.getElementById("sendmessage").addEventListener("click", function (event) {
+            var user = "You";
+            var message = document.getElementById("message").value;
+            connection.invoke("SendMessage", user, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+            event.preventDefault();
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+</body>
+
+</html>
